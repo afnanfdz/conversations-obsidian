@@ -5,5 +5,5 @@ export function get_speaker_idx(settings: ConversationsPluginSettings, name: str
 }
 
 export function speaker_exists(settings: ConversationsPluginSettings, name: string) {
-    return get_speaker_idx(settings, name) == -1;
+    return get_speaker_idx(settings, name) != -1;
 }
