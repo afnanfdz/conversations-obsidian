@@ -1,21 +1,15 @@
 import { Plugin } from 'obsidian';
-import { ConversationsPostProcessor } from 'src/conversationsPostProcessor';
+import { ConversationsPluginSettings, DEFAULT_SETTINGS } from  './types'
+import { ConversationsPostProcessor } from './conversationsPostProcessor';
 import { ConversationsSettingsTab } from './conversationsSettings';
 
-interface ConversationsPluginSettings {
-  dateFormat: string;
-}
-
-const DEFAULT_SETTINGS: ConversationsPluginSettings = {
-  dateFormat: "dd-mm-yyyy"
-};
 
 export default class ConversationsPlugin extends Plugin {
   settings: ConversationsPluginSettings;
 
   async onload() {
     await this.loadSettings();
-    this.addSettingTab(new ConversationsSettingsTab(this.app, this));
+    this.addSettingTab(new ConversationsSettingsTab(this));
     this.registerMarkdownPostProcessor(ConversationsPostProcessor);
   }
 
@@ -27,5 +21,9 @@ export default class ConversationsPlugin extends Plugin {
 
   async saveSettings() {
     await this.saveData(this.settings);
+  }
+
+  async onExternalSettingsChange() {
+    this.registerMarkdownPostProcessor(ConversationsPostProcessor);
   }
 }
