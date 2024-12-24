@@ -6,3 +6,10 @@ available in the app when your plugin is enabled.
 If your plugin does not need CSS, delete this file.
 
 */
+.conversationBox {
+    display: grid;
+    grid-template-columns: 1fr 5fr;
+
+    border: 2px solid white;
+    border-radius: 2px;
+}
