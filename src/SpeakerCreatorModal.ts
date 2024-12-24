@@ -1,14 +1,20 @@
 import { App, Modal, Notice, Setting } from "obsidian";
 import ConversationsPlugin from "./main";
 import { ModalMode, SpeakerSettings } from "./types";
-import { get_speaker_idx } from "./util";
+import { get_speaker_idx, speaker_exists } from "./util";
 
 export default class SpeakerCreatorModal extends Modal {
     plugin: ConversationsPlugin;
     mode: ModalMode;
     entry_idx: number;
-    entry_settings: SpeakerSettings;
+    entry_settings: SpeakerSettings; 
 
+    /**
+     * 
+     * @param plugin The Conversations plugin.
+     * @param mode The mode of the modification (New or Edit).
+     * @param idx_name The original name of the entry to be edited. This name will be searched, and if used, is assumed to exist in `data.json`.
+     */
     constructor(plugin: ConversationsPlugin, mode: ModalMode, idx_name?: string) {
         super(plugin.app);
         this.plugin = plugin;
@@ -34,8 +40,21 @@ export default class SpeakerCreatorModal extends Modal {
         this.display();
     }
 
-    display() {
-        this.setTitle("Add a Speaker");
+    /**
+     * The bulk of the settings tab that's rendered on-screen.
+     */
+    display(): void {
+        let title;
+        switch (this.mode) {
+            case ModalMode.New:
+                title = "Add a Speaker";
+                break;
+            case ModalMode.Edit:
+                title = "Edit a Speaker";
+                break;
+        }
+
+        this.setTitle(title);
 
         new Setting(this.contentEl)
             .setName('Name')
@@ -66,13 +85,20 @@ export default class SpeakerCreatorModal extends Modal {
                     .setButtonText("Submit")
                     .setCta()
                     .onClick(() => {
-                        this.finalize_entry();
-                        this.close();
+                        if (speaker_exists(this.plugin.settings, this.entry_settings.name)) {
+                            new Notice("ERROR: Name already exists");
+                        } else {
+                            this.finalize_entry();
+                            this.close();
+                        }
                     })
             );
     }
 
-    finalize_entry() {
+    /**
+     * Registers the modification just before closing.
+     */
+    finalize_entry(): void {
         switch (this.mode) {
             case ModalMode.New:
                 this.plugin.settings.speakers.push(this.entry_settings);
